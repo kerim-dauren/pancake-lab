@@ -4,6 +4,7 @@ import org.pancakelab.exception.OrderNotFoundException;
 import org.pancakelab.model.Order;
 import org.pancakelab.model.OrderFactory;
 import org.pancakelab.model.OrderState;
+import org.pancakelab.model.pancakes.Ingredient;
 import org.pancakelab.model.pancakes.Pancake;
 import org.pancakelab.model.pancakes.PancakeRecipe;
 import org.pancakelab.repository.OrderRepository;
@@ -45,7 +46,7 @@ public class PancakeService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
             addPancake(new Pancake.Builder()
-                    .withIngredients(List.of("dark chocolate"))
+                    .withIngredients(List.of(Ingredient.DARK_CHOCOLATE))
                     .build(), order);
         }
     }
@@ -54,7 +55,7 @@ public class PancakeService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
             addPancake(new Pancake.Builder()
-                    .withIngredients(List.of("dark chocolate", "whipped cream"))
+                    .withIngredients(List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM))
                     .build(), order);
         }
     }
@@ -63,7 +64,7 @@ public class PancakeService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
             addPancake(new Pancake.Builder()
-                    .withIngredients(List.of("dark chocolate", "whipped cream", "hazelnuts"))
+                    .withIngredients(List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM, Ingredient.HAZELNUTS))
                     .build(), order);
         }
     }
@@ -72,7 +73,7 @@ public class PancakeService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
             addPancake(new Pancake.Builder()
-                    .withIngredients(List.of("milk chocolate"))
+                    .withIngredients(List.of(Ingredient.MILK_CHOCOLATE))
                     .build(), order);
         }
     }
@@ -81,7 +82,7 @@ public class PancakeService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
             addPancake(new Pancake.Builder()
-                    .withIngredients(List.of("milk chocolate", "hazelnuts"))
+                    .withIngredients(List.of(Ingredient.MILK_CHOCOLATE, Ingredient.HAZELNUTS))
                     .build(), order);
         }
     }
