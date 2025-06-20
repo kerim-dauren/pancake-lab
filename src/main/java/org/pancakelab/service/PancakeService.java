@@ -1,5 +1,6 @@
 package org.pancakelab.service;
 
+import org.pancakelab.exception.OrderNotFoundException;
 import org.pancakelab.model.Order;
 import org.pancakelab.model.pancakes.*;
 import org.pancakelab.repository.OrderRepository;
@@ -24,32 +25,37 @@ public class PancakeService {
     }
 
     public void addDarkChocolatePancake(UUID orderId, int count) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
-            addPancake(new DarkChocolatePancake(), orderRepository.findById(orderId).get());
+            addPancake(new DarkChocolatePancake(), order);
         }
     }
 
     public void addDarkChocolateWhippedCreamPancake(UUID orderId, int count) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
-            addPancake(new DarkChocolateWhippedCreamPancake(), orderRepository.findById(orderId).get());
+            addPancake(new DarkChocolateWhippedCreamPancake(), order);
         }
     }
 
     public void addDarkChocolateWhippedCreamHazelnutsPancake(UUID orderId, int count) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
-            addPancake(new DarkChocolateWhippedCreamHazelnutsPancake(), orderRepository.findById(orderId).get());
+            addPancake(new DarkChocolateWhippedCreamHazelnutsPancake(), order);
         }
     }
 
     public void addMilkChocolatePancake(UUID orderId, int count) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
-            addPancake(new MilkChocolatePancake(), orderRepository.findById(orderId).get());
+            addPancake(new MilkChocolatePancake(), order);
         }
     }
 
     public void addMilkChocolateHazelnutsPancake(UUID orderId, int count) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         for (int i = 0; i < count; ++i) {
-            addPancake(new MilkChocolateHazelnutsPancake(), orderRepository.findById(orderId).get());
+            addPancake(new MilkChocolateHazelnutsPancake(), order);
         }
     }
 
@@ -74,12 +80,12 @@ public class PancakeService {
                     removedCount.getAndIncrement() < count;
         });
 
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         OrderLog.logRemovePancakes(order, description, removedCount.get(), pancakes);
     }
 
     public void cancelOrder(UUID orderId) {
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         OrderLog.logCancelOrder(order, this.pancakes);
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
@@ -110,7 +116,7 @@ public class PancakeService {
     public Object[] deliverOrder(UUID orderId) {
         if (!preparedOrders.contains(orderId)) return null;
 
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<String> pancakesToDeliver = viewOrder(orderId);
         OrderLog.logDeliverOrder(order, this.pancakes);
 
