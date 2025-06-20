@@ -11,7 +11,9 @@ import org.pancakelab.model.OrderFactory;
 import org.pancakelab.model.OrderValidator;
 import org.pancakelab.model.OrderValidatorConfig;
 import org.pancakelab.repository.OrderRepository;
+import org.pancakelab.repository.PancakeRepository;
 import org.pancakelab.repository.impl.InMemoryOrderRepository;
+import org.pancakelab.repository.impl.InMemoryPancakeRepository;
 import org.pancakelab.service.impl.ConsoleLogger;
 import org.pancakelab.service.impl.InMemoryOrderStateService;
 
@@ -35,12 +37,14 @@ public class PancakeServiceTest {
     private final OrderRepository orderRepository = new InMemoryOrderRepository();
     private final OrderLogger orderLogger = new ConsoleLogger();
     private final OrderStateService orderStateService = new InMemoryOrderStateService();
+    private final PancakeRepository pancakeRepository = new InMemoryPancakeRepository();
 
     private final PancakeService pancakeService = new PancakeService(
             orderRepository,
             orderFactory,
             orderLogger,
-            orderStateService
+            orderStateService,
+            pancakeRepository
     );
 
     private Order order = null;

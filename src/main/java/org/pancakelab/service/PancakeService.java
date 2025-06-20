@@ -7,30 +7,31 @@ import org.pancakelab.model.OrderState;
 import org.pancakelab.model.pancakes.Pancake;
 import org.pancakelab.model.pancakes.PancakeRecipe;
 import org.pancakelab.repository.OrderRepository;
+import org.pancakelab.repository.PancakeRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PancakeService {
-    private List<PancakeRecipe> pancakes = new ArrayList<>();
     private final OrderRepository orderRepository;
     private final OrderFactory orderFactory;
     private final OrderLogger orderLogger;
     private final OrderStateService orderStateService;
+    private final PancakeRepository pancakeRepository;
 
     public PancakeService(
             OrderRepository orderRepository,
             OrderFactory orderFactory,
             OrderLogger orderLogger,
-            OrderStateService orderStateService
+            OrderStateService orderStateService,
+            PancakeRepository pancakeRepository
     ) {
         this.orderRepository = orderRepository;
         this.orderFactory = orderFactory;
         this.orderLogger = orderLogger;
         this.orderStateService = orderStateService;
+        this.pancakeRepository = pancakeRepository;
     }
 
     public Order createOrder(int building, int room) {
@@ -86,39 +87,29 @@ public class PancakeService {
     }
 
     public List<String> viewOrder(UUID orderId) {
-        return pancakes.stream()
-                .filter(pancake -> pancake.getOrderId().equals(orderId))
-                .map(PancakeRecipe::description).toList();
+        return pancakeRepository.viewOrderPancakes(orderId);
     }
 
     private void addPancake(PancakeRecipe pancake, Order order) {
-        pancake.setOrderId(order.getId());
-        pancakes.add(pancake);
-
-        orderLogger.logAddPancake(order, pancake.description(), pancakes);
+        int pancakeCount = pancakeRepository.addPancake(order.getId(), pancake);
+        orderLogger.logAddPancake(order, pancake.description(), pancakeCount);
     }
 
     public void removePancakes(String description, UUID orderId, int count) {
-        final AtomicInteger removedCount = new AtomicInteger(0);
-        pancakes.removeIf(pancake -> {
-            return pancake.getOrderId().equals(orderId) &&
-                    pancake.description().equals(description) &&
-                    removedCount.getAndIncrement() < count;
-        });
+        int removedCount = pancakeRepository.removePancakes(orderId, description, count);
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        orderLogger.logRemovePancakes(order, description, removedCount.get(), pancakes);
+        orderLogger.logRemovePancakes(order, description, pancakeRepository.getPancakesCount(order.getId()), removedCount);
     }
 
     public void cancelOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        orderLogger.logCancelOrder(order, this.pancakes);
-
-        pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
+        orderLogger.logCancelOrder(order, pancakeRepository.getPancakesCount(order.getId()));
+        pancakeRepository.remove(orderId);
         orderRepository.deleteById(orderId);
         orderStateService.remove(orderId);
 
-        orderLogger.logCancelOrder(order, pancakes);
+        orderLogger.logCancelOrder(order, pancakeRepository.getPancakesCount(order.getId()));
     }
 
     public void completeOrder(UUID orderId) {
@@ -143,9 +134,8 @@ public class PancakeService {
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<String> pancakesToDeliver = viewOrder(orderId);
-        orderLogger.logDeliverOrder(order, this.pancakes);
-
-        pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
+        orderLogger.logDeliverOrder(order, pancakeRepository.getPancakesCount(order.getId()));
+        pancakeRepository.remove(orderId);
         orderRepository.deleteById(orderId);
         orderStateService.remove(orderId);
 
