@@ -2,6 +2,7 @@ package org.pancakelab.service;
 
 import org.pancakelab.exception.OrderNotFoundException;
 import org.pancakelab.model.Order;
+import org.pancakelab.model.OrderFactory;
 import org.pancakelab.model.pancakes.Pancake;
 import org.pancakelab.model.pancakes.PancakeRecipe;
 import org.pancakelab.repository.OrderRepository;
@@ -14,13 +15,15 @@ public class PancakeService {
     private Set<UUID> preparedOrders = new HashSet<>();
     private List<PancakeRecipe> pancakes = new ArrayList<>();
     private final OrderRepository orderRepository;
+    private final OrderFactory orderFactory;
 
-    public PancakeService(OrderRepository orderRepository) {
+    public PancakeService(OrderRepository orderRepository, OrderFactory orderFactory) {
         this.orderRepository = orderRepository;
+        this.orderFactory = orderFactory;
     }
 
     public Order createOrder(int building, int room) {
-        Order order = new Order(building, room);
+        Order order = orderFactory.createOrder(building, room);
         orderRepository.save(order);
         return order;
     }

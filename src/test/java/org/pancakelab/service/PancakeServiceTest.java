@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.pancakelab.model.Order;
+import org.pancakelab.model.OrderFactory;
+import org.pancakelab.model.OrderValidator;
+import org.pancakelab.model.OrderValidatorConfig;
 import org.pancakelab.repository.OrderRepository;
 import org.pancakelab.repository.impl.InMemoryOrderRepository;
 
@@ -17,8 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PancakeServiceTest {
+    private final OrderValidatorConfig orderValidatorConfig = new OrderValidatorConfig(1, 10, 1, 100);
+    private final OrderValidator orderValidator = new OrderValidator(orderValidatorConfig);
+    private final OrderFactory orderFactory = new OrderFactory(orderValidator);
     private final OrderRepository orderRepository = new InMemoryOrderRepository();
-    private final PancakeService pancakeService = new PancakeService(orderRepository);
+    private final PancakeService pancakeService = new PancakeService(orderRepository, orderFactory);
     private Order order = null;
 
     private final static String DARK_CHOCOLATE_PANCAKE_DESCRIPTION = "Delicious pancake with dark chocolate!";

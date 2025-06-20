@@ -8,7 +8,7 @@ public class Order {
     private final int building;
     private final int room;
 
-    public Order(int building, int room) {
+    Order(int building, int room) {
         this.id = UUID.randomUUID();
         this.building = building;
         this.room = room;
