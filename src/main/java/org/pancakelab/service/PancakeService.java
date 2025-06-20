@@ -3,36 +3,40 @@ package org.pancakelab.service;
 import org.pancakelab.exception.OrderNotFoundException;
 import org.pancakelab.model.Order;
 import org.pancakelab.model.OrderFactory;
-import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.OrderState;
 import org.pancakelab.model.pancakes.Pancake;
 import org.pancakelab.model.pancakes.PancakeRecipe;
 import org.pancakelab.repository.OrderRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class PancakeService {
     private List<PancakeRecipe> pancakes = new ArrayList<>();
     private final OrderRepository orderRepository;
     private final OrderFactory orderFactory;
     private final OrderLogger orderLogger;
-    private final Map<UUID, OrderStatus> orderStatuses = new HashMap<>();
+    private final OrderStateManager orderStateManager;
 
     public PancakeService(
             OrderRepository orderRepository,
             OrderFactory orderFactory,
-            OrderLogger orderLogger
+            OrderLogger orderLogger,
+            OrderStateManager orderStateManager
     ) {
         this.orderRepository = orderRepository;
         this.orderFactory = orderFactory;
         this.orderLogger = orderLogger;
+        this.orderStateManager = orderStateManager;
     }
 
     public Order createOrder(int building, int room) {
         Order order = orderFactory.createOrder(building, room);
         orderRepository.save(order);
-        orderStatuses.put(order.getId(), OrderStatus.CREATED);
+        orderStateManager.update(order.getId(), OrderState.CREATED);
         return order;
     }
 
@@ -112,37 +116,30 @@ public class PancakeService {
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
-        orderStatuses.remove(orderId);
+        orderStateManager.remove(orderId);
 
         orderLogger.logCancelOrder(order, pancakes);
     }
 
     public void completeOrder(UUID orderId) {
-        orderStatuses.put(orderId, OrderStatus.COMPLETED);
+        orderStateManager.update(orderId, OrderState.COMPLETED);
     }
 
     public Set<UUID> listCompletedOrders() {
-        return orderStatuses.entrySet().stream()
-                .filter(entry -> entry.getValue() == OrderStatus.COMPLETED)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        return orderStateManager.getOrderIdsByState(OrderState.COMPLETED);
 
     }
 
     public void prepareOrder(UUID orderId) {
-        orderStatuses.remove(orderId);
-        orderStatuses.put(orderId, OrderStatus.PREPARED);
+        orderStateManager.update(orderId, OrderState.PREPARED);
     }
 
     public Set<UUID> listPreparedOrders() {
-        return orderStatuses.entrySet().stream()
-                .filter(entry -> entry.getValue() == OrderStatus.PREPARED)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        return orderStateManager.getOrderIdsByState(OrderState.PREPARED);
     }
 
     public Object[] deliverOrder(UUID orderId) {
-        if (orderStatuses.get(orderId) != OrderStatus.PREPARED) return null;
+        if (orderStateManager.get(orderId) != OrderState.PREPARED) return null;
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<String> pancakesToDeliver = viewOrder(orderId);
@@ -150,8 +147,7 @@ public class PancakeService {
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
-        orderStatuses.remove(orderId);
-        System.out.println(orderStatuses);
+        orderStateManager.remove(orderId);
 
         return new Object[]{order, pancakesToDeliver};
     }

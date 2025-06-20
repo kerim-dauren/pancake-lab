@@ -1,6 +1,6 @@
 package org.pancakelab.model;
 
-public enum OrderStatus {
+public enum OrderState {
     CREATED,
     COMPLETED,
     PREPARED
