@@ -24,7 +24,14 @@ public class PancakeServiceTest {
     private final OrderValidator orderValidator = new OrderValidator(orderValidatorConfig);
     private final OrderFactory orderFactory = new OrderFactory(orderValidator);
     private final OrderRepository orderRepository = new InMemoryOrderRepository();
-    private final PancakeService pancakeService = new PancakeService(orderRepository, orderFactory);
+    private final OrderLogger orderLogger = new ConsoleLogger();
+
+    private final PancakeService pancakeService = new PancakeService(
+            orderRepository,
+            orderFactory,
+            orderLogger
+    );
+
     private Order order = null;
 
     private final static String DARK_CHOCOLATE_PANCAKE_DESCRIPTION = "Delicious pancake with dark chocolate!";

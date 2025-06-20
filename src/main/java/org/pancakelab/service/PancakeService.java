@@ -16,10 +16,16 @@ public class PancakeService {
     private List<PancakeRecipe> pancakes = new ArrayList<>();
     private final OrderRepository orderRepository;
     private final OrderFactory orderFactory;
+    private final OrderLogger orderLogger;
 
-    public PancakeService(OrderRepository orderRepository, OrderFactory orderFactory) {
+    public PancakeService(
+            OrderRepository orderRepository,
+            OrderFactory orderFactory,
+            OrderLogger orderLogger
+    ) {
         this.orderRepository = orderRepository;
         this.orderFactory = orderFactory;
+        this.orderLogger = orderLogger;
     }
 
     public Order createOrder(int building, int room) {
@@ -83,7 +89,7 @@ public class PancakeService {
         pancake.setOrderId(order.getId());
         pancakes.add(pancake);
 
-        OrderLog.logAddPancake(order, pancake.description(), pancakes);
+        orderLogger.logAddPancake(order, pancake.description(), pancakes);
     }
 
     public void removePancakes(String description, UUID orderId, int count) {
@@ -95,19 +101,19 @@ public class PancakeService {
         });
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        OrderLog.logRemovePancakes(order, description, removedCount.get(), pancakes);
+        orderLogger.logRemovePancakes(order, description, removedCount.get(), pancakes);
     }
 
     public void cancelOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        OrderLog.logCancelOrder(order, this.pancakes);
+        orderLogger.logCancelOrder(order, this.pancakes);
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
         completedOrders.removeIf(u -> u.equals(orderId));
         preparedOrders.removeIf(u -> u.equals(orderId));
 
-        OrderLog.logCancelOrder(order, pancakes);
+        orderLogger.logCancelOrder(order, pancakes);
     }
 
     public void completeOrder(UUID orderId) {
@@ -132,7 +138,7 @@ public class PancakeService {
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<String> pancakesToDeliver = viewOrder(orderId);
-        OrderLog.logDeliverOrder(order, this.pancakes);
+        orderLogger.logDeliverOrder(order, this.pancakes);
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
