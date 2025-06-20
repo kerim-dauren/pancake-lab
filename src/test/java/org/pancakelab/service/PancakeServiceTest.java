@@ -4,6 +4,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.pancakelab.exception.OrderNotFoundException;
+import org.pancakelab.exception.ValidationException;
 import org.pancakelab.model.Order;
 import org.pancakelab.model.OrderFactory;
 import org.pancakelab.model.OrderValidator;
@@ -20,7 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PancakeServiceTest {
-    private final OrderValidatorConfig orderValidatorConfig = new OrderValidatorConfig(1, 10, 1, 100);
+    private static final int MIN_BUILDING = 1;
+    private static final int MAX_BUILDING = 10;
+    private static final int MIN_ROOM = 1;
+    private static final int MAX_ROOM = 100;
+
+    private final OrderValidatorConfig orderValidatorConfig = new OrderValidatorConfig(MIN_BUILDING, MAX_BUILDING, MIN_ROOM, MAX_ROOM);
     private final OrderValidator orderValidator = new OrderValidator(orderValidatorConfig);
     private final OrderFactory orderFactory = new OrderFactory(orderValidator);
     private final OrderRepository orderRepository = new InMemoryOrderRepository();
@@ -44,14 +51,23 @@ public class PancakeServiceTest {
         // setup
 
         // exercise
-        order = pancakeService.createOrder(10, 20);
+        order = pancakeService.createOrder(MIN_BUILDING, MIN_ROOM);
 
-        assertEquals(10, order.getBuilding());
-        assertEquals(20, order.getRoom());
+        assertEquals(MIN_BUILDING, order.getBuilding());
+        assertEquals(MIN_ROOM, order.getRoom());
 
         // verify
 
         // tear down
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(11)
+    public void GivenOrderDoesNotExist_WhenCreatingOrderWithInvalidParams_ThenThrowsValidationException_Test() {
+        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING - 1, MIN_ROOM));
+        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MAX_BUILDING + 1, MIN_ROOM));
+        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING, MIN_ROOM - 1));
+        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING, MAX_ROOM + 1));
     }
 
     @Test
@@ -76,6 +92,17 @@ public class PancakeServiceTest {
                 MILK_CHOCOLATE_HAZELNUTS_PANCAKE_DESCRIPTION), ordersPancakes);
 
         // tear down
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(21)
+    public void GivenOrderDoesNotExist_WhenViewOrderWithInvalidOrderId_ThenThrowsOrderNotFoundException_Test() {
+        UUID orderId = UUID.randomUUID();
+        assertThrows(OrderNotFoundException.class, () -> pancakeService.addDarkChocolatePancake(orderId, 1));
+        assertThrows(OrderNotFoundException.class, () -> pancakeService.addDarkChocolateWhippedCreamPancake(orderId, 1));
+        assertThrows(OrderNotFoundException.class, () -> pancakeService.addDarkChocolateWhippedCreamHazelnutsPancake(orderId, 1));
+        assertThrows(OrderNotFoundException.class, () -> pancakeService.addMilkChocolatePancake(orderId, 1));
+        assertThrows(OrderNotFoundException.class, () -> pancakeService.addMilkChocolateHazelnutsPancake(orderId, 1));
     }
 
     @Test
@@ -161,7 +188,7 @@ public class PancakeServiceTest {
     @org.junit.jupiter.api.Order(70)
     public void GivenOrderExists_WhenCancellingOrder_ThenOrderAndPancakesRemoved_Test() {
         // setup
-        order = pancakeService.createOrder(10, 20);
+        order = pancakeService.createOrder(MIN_BUILDING, MIN_ROOM);
         addPancakes();
 
         // exercise
