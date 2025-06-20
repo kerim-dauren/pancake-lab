@@ -3,6 +3,10 @@ package org.pancakelab.service.impl;
 import org.pancakelab.model.Order;
 import org.pancakelab.service.OrderLogger;
 
+/**
+ * ConsoleLogger is an implementation of the OrderLogger interface that logs order events to the console.
+ * It provides methods to log when pancakes are added, removed, orders are cancelled, and orders are delivered.
+ */
 public class ConsoleLogger implements OrderLogger {
 
     public void logAddPancake(Order order, String description, int pancakeCount) {

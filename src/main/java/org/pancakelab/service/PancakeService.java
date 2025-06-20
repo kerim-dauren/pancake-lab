@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Service class for managing pancake orders in the Pancake Lab.
+ * This class provides methods to create, modify, and manage pancake orders,
+ * including adding pancakes with various ingredients, viewing orders, and handling order states.
+ */
 public class PancakeService {
     private final OrderRepository orderRepository;
     private final OrderFactory orderFactory;

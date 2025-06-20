@@ -3,6 +3,10 @@ package org.pancakelab.model.pancakes;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a pancake in the Pancake Lab.
+ * Each pancake is defined by its ingredients and can be built using the Builder pattern.
+ */
 public class Pancake implements PancakeRecipe {
     private List<Ingredient> ingredients;
 

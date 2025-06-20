@@ -8,8 +8,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * In-memory implementation of the OrderRepository interface.
+ * This class provides a thread-safe way to store and retrieve orders in memory.
+ */
 public class InMemoryOrderRepository implements OrderRepository {
-    // Thread-safe map of orderId → Order
     private final ConcurrentMap<UUID, Order> orders = new ConcurrentHashMap<>();
 
     @Override

@@ -9,8 +9,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+/**
+ * In-memory implementation of the PancakeRepository interface.
+ * This class provides a thread-safe way to store and retrieve pancake recipes associated with orders.
+ */
 public class InMemoryPancakeRepository implements PancakeRepository {
-    // Thread-safe map of orderId → Deque of PancakeRecipe
     private final Map<UUID, ConcurrentLinkedDeque<PancakeRecipe>> orderPancakes = new ConcurrentHashMap<>();
 
     @Override

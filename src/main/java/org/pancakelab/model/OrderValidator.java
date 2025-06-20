@@ -2,6 +2,10 @@ package org.pancakelab.model;
 
 import org.pancakelab.exception.ValidationException;
 
+/**
+ * Validates the order details such as building and room numbers.
+ * Ensures that the provided building and room numbers are within the configured valid ranges.
+ */
 public class OrderValidator {
 
     private final OrderValidatorConfig config;

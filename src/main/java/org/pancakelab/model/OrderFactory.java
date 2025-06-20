@@ -1,5 +1,9 @@
 package org.pancakelab.model;
 
+/**
+ * Factory class for creating Order instances.
+ * It uses an OrderValidator to ensure that the order details are valid before creation.
+ */
 public class OrderFactory {
 
     private final OrderValidator orderValidator;

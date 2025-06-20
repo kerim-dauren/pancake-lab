@@ -9,8 +9,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * In-memory implementation of the OrderStateService interface.
+ * This class provides a thread-safe way to manage order states in memory.
+ */
 public class InMemoryOrderStateService implements OrderStateService {
-    // Thread-safe map of orderId → OrderState
     private final Map<UUID, OrderState> orderStates = new ConcurrentHashMap<>();
 
     @Override

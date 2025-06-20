@@ -1,5 +1,9 @@
 package org.pancakelab.model;
 
+/**
+ * Configuration class for order validation.
+ * Contains the valid ranges for building and room numbers.
+ */
 public class OrderValidatorConfig {
     private int minBuildingNumber;
     private int maxBuildingNumber;

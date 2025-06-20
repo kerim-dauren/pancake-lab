@@ -3,6 +3,11 @@ package org.pancakelab.model;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Represents an order in the Pancake Lab.
+ * Each order has a unique ID, a building number, and a room number.
+ * The ID is generated randomly upon creation of the order.
+ */
 public class Order {
     private final UUID id;
     private final int building;
