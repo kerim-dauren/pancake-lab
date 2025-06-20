@@ -5,7 +5,7 @@ import org.pancakelab.model.OrderState;
 import java.util.Set;
 import java.util.UUID;
 
-public interface OrderStateManager {
+public interface OrderStateService {
     /**
      * Retrieves the current state of an order.
      *

@@ -19,24 +19,24 @@ public class PancakeService {
     private final OrderRepository orderRepository;
     private final OrderFactory orderFactory;
     private final OrderLogger orderLogger;
-    private final OrderStateManager orderStateManager;
+    private final OrderStateService orderStateService;
 
     public PancakeService(
             OrderRepository orderRepository,
             OrderFactory orderFactory,
             OrderLogger orderLogger,
-            OrderStateManager orderStateManager
+            OrderStateService orderStateService
     ) {
         this.orderRepository = orderRepository;
         this.orderFactory = orderFactory;
         this.orderLogger = orderLogger;
-        this.orderStateManager = orderStateManager;
+        this.orderStateService = orderStateService;
     }
 
     public Order createOrder(int building, int room) {
         Order order = orderFactory.createOrder(building, room);
         orderRepository.save(order);
-        orderStateManager.update(order.getId(), OrderState.CREATED);
+        orderStateService.update(order.getId(), OrderState.CREATED);
         return order;
     }
 
@@ -116,30 +116,30 @@ public class PancakeService {
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
-        orderStateManager.remove(orderId);
+        orderStateService.remove(orderId);
 
         orderLogger.logCancelOrder(order, pancakes);
     }
 
     public void completeOrder(UUID orderId) {
-        orderStateManager.update(orderId, OrderState.COMPLETED);
+        orderStateService.update(orderId, OrderState.COMPLETED);
     }
 
     public Set<UUID> listCompletedOrders() {
-        return orderStateManager.getOrderIdsByState(OrderState.COMPLETED);
+        return orderStateService.getOrderIdsByState(OrderState.COMPLETED);
 
     }
 
     public void prepareOrder(UUID orderId) {
-        orderStateManager.update(orderId, OrderState.PREPARED);
+        orderStateService.update(orderId, OrderState.PREPARED);
     }
 
     public Set<UUID> listPreparedOrders() {
-        return orderStateManager.getOrderIdsByState(OrderState.PREPARED);
+        return orderStateService.getOrderIdsByState(OrderState.PREPARED);
     }
 
     public Object[] deliverOrder(UUID orderId) {
-        if (orderStateManager.get(orderId) != OrderState.PREPARED) return null;
+        if (orderStateService.get(orderId) != OrderState.PREPARED) return null;
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<String> pancakesToDeliver = viewOrder(orderId);
@@ -147,7 +147,7 @@ public class PancakeService {
 
         pancakes.removeIf(pancake -> pancake.getOrderId().equals(orderId));
         orderRepository.deleteById(orderId);
-        orderStateManager.remove(orderId);
+        orderStateService.remove(orderId);
 
         return new Object[]{order, pancakesToDeliver};
     }
