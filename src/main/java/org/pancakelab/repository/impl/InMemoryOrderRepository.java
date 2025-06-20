@@ -3,26 +3,27 @@ package org.pancakelab.repository.impl;
 import org.pancakelab.model.Order;
 import org.pancakelab.repository.OrderRepository;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class InMemoryOrderRepository implements OrderRepository {
-    private List<Order> orders = new ArrayList<>();
+    // Thread-safe map of orderId → Order
+    private final ConcurrentMap<UUID, Order> orders = new ConcurrentHashMap<>();
 
     @Override
     public void save(Order order) {
-        orders.add(order);
+        orders.put(order.getId(), order);
     }
 
     @Override
     public Optional<Order> findById(UUID orderId) {
-        return orders.stream().filter(o -> o.getId().equals(orderId)).findFirst();
+        return Optional.ofNullable(orders.get(orderId));
     }
 
     @Override
     public void deleteById(UUID orderId) {
-        orders.removeIf(o -> o.getId().equals(orderId));
+        orders.remove(orderId);
     }
 }

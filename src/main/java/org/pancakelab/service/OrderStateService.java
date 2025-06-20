@@ -5,6 +5,11 @@ import org.pancakelab.model.OrderState;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Service interface for managing the state of orders.
+ * Provides methods to get, update, and remove order states,
+ * as well as retrieve order IDs by their state.
+ */
 public interface OrderStateService {
     /**
      * Retrieves the current state of an order.

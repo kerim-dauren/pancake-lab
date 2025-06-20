@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class InMemoryOrderStateService implements OrderStateService {
-
+    // Thread-safe map of orderId → OrderState
     private final Map<UUID, OrderState> orderStates = new ConcurrentHashMap<>();
 
     @Override
