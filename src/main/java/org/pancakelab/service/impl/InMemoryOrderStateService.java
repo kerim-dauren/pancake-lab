@@ -1,6 +1,6 @@
 package org.pancakelab.service.impl;
 
-import org.pancakelab.model.OrderState;
+import org.pancakelab.model.orders.OrderState;
 import org.pancakelab.service.OrderStateService;
 
 import java.util.Map;

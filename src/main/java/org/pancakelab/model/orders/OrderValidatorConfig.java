@@ -1,4 +1,4 @@
-package org.pancakelab.model;
+package org.pancakelab.model.orders;
 
 /**
  * Configuration class for order validation.

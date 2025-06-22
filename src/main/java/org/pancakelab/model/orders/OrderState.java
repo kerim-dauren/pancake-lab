@@ -1,4 +1,4 @@
-package org.pancakelab.model;
+package org.pancakelab.model.orders;
 
 /**
  * Represents the state of an order in the Pancake Lab.

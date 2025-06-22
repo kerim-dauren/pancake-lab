@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.Order;
+import org.pancakelab.model.orders.Order;
 
 /**
  * Interface for logging order-related events.

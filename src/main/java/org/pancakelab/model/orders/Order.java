@@ -1,4 +1,4 @@
-package org.pancakelab.model;
+package org.pancakelab.model.orders;
 
 import java.util.Objects;
 import java.util.UUID;

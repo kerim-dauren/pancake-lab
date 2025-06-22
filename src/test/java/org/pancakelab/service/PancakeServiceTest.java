@@ -6,10 +6,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.pancakelab.exception.OrderNotFoundException;
 import org.pancakelab.exception.ValidationException;
-import org.pancakelab.model.Order;
-import org.pancakelab.model.OrderFactory;
-import org.pancakelab.model.OrderValidator;
-import org.pancakelab.model.OrderValidatorConfig;
+import org.pancakelab.model.orders.DefaultOrderFactory;
+import org.pancakelab.model.orders.Order;
+import org.pancakelab.model.orders.OrderValidator;
+import org.pancakelab.model.orders.OrderValidatorConfig;
+import org.pancakelab.model.pancakes.DefaultPancakeFactory;
+import org.pancakelab.model.pancakes.PancakeFactory;
 import org.pancakelab.repository.OrderRepository;
 import org.pancakelab.repository.PancakeRepository;
 import org.pancakelab.repository.impl.InMemoryOrderRepository;
@@ -33,18 +35,20 @@ public class PancakeServiceTest {
 
     private final OrderValidatorConfig orderValidatorConfig = new OrderValidatorConfig(MIN_BUILDING, MAX_BUILDING, MIN_ROOM, MAX_ROOM);
     private final OrderValidator orderValidator = new OrderValidator(orderValidatorConfig);
-    private final OrderFactory orderFactory = new OrderFactory(orderValidator);
+    private final DefaultOrderFactory orderFactory = new DefaultOrderFactory(orderValidator);
     private final OrderRepository orderRepository = new InMemoryOrderRepository();
     private final OrderLogger orderLogger = new ConsoleLogger();
     private final OrderStateService orderStateService = new InMemoryOrderStateService();
     private final PancakeRepository pancakeRepository = new InMemoryPancakeRepository();
+    private final PancakeFactory pancakeFactory = new DefaultPancakeFactory();
 
     private final PancakeService pancakeService = new PancakeService(
             orderRepository,
             orderFactory,
             orderLogger,
             orderStateService,
-            pancakeRepository
+            pancakeRepository,
+            pancakeFactory
     );
 
     private Order order = null;

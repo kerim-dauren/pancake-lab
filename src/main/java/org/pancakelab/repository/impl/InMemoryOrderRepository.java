@@ -1,6 +1,6 @@
 package org.pancakelab.repository.impl;
 
-import org.pancakelab.model.Order;
+import org.pancakelab.model.orders.Order;
 import org.pancakelab.repository.OrderRepository;
 
 import java.util.Optional;

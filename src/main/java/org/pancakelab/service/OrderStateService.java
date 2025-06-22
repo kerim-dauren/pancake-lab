@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderState;
+import org.pancakelab.model.orders.OrderState;
 
 import java.util.Set;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package org.pancakelab.model;
+package org.pancakelab.model.orders;
 
 import org.pancakelab.exception.ValidationException;
 

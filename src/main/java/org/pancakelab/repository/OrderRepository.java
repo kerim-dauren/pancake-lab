@@ -1,6 +1,6 @@
 package org.pancakelab.repository;
 
-import org.pancakelab.model.Order;
+import org.pancakelab.model.orders.Order;
 
 import java.util.Optional;
 import java.util.UUID;

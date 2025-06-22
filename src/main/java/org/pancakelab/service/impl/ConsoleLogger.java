@@ -1,6 +1,6 @@
 package org.pancakelab.service.impl;
 
-import org.pancakelab.model.Order;
+import org.pancakelab.model.orders.Order;
 import org.pancakelab.service.OrderLogger;
 
 /**
