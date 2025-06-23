@@ -1,8 +1,8 @@
 package org.pancakelab.service;
 
 import org.pancakelab.exception.OrderNotFoundException;
-import org.pancakelab.model.orders.DefaultOrderFactory;
 import org.pancakelab.model.orders.Order;
+import org.pancakelab.model.orders.OrderFactory;
 import org.pancakelab.model.orders.OrderState;
 import org.pancakelab.model.pancakes.Ingredient;
 import org.pancakelab.model.pancakes.PancakeFactory;
@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PancakeService {
     private final OrderRepository orderRepository;
-    private final DefaultOrderFactory orderFactory;
+    private final OrderFactory orderFactory;
     private final OrderLogger orderLogger;
     private final OrderStateService orderStateService;
     private final PancakeRepository pancakeRepository;
@@ -33,7 +33,7 @@ public class PancakeService {
 
     public PancakeService(
             OrderRepository orderRepository,
-            DefaultOrderFactory orderFactory,
+            OrderFactory orderFactory,
             OrderLogger orderLogger,
             OrderStateService orderStateService,
             PancakeRepository pancakeRepository,
