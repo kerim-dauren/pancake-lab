@@ -11,13 +11,17 @@ import org.pancakelab.repository.OrderRepository;
 import org.pancakelab.repository.PancakeRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Service class for managing pancake orders in the Pancake Lab.
+ * Service class for managing pancake orders.
  * This class provides methods to create, modify, and manage pancake orders,
- * including adding pancakes with various ingredients, viewing orders, and handling order states.
+ * including adding pancakes, viewing orders, and changing order states.
  */
 public class PancakeService {
     private final OrderRepository orderRepository;
@@ -43,6 +47,12 @@ public class PancakeService {
         this.pancakeFactory = pancakeFactory;
     }
 
+    private final Map<UUID, Lock> orderLocks = new ConcurrentHashMap<>();
+
+    private Lock getOrderLock(UUID orderId) {
+        return orderLocks.computeIfAbsent(orderId, id -> new ReentrantLock());
+    }
+
     public Order createOrder(int building, int room) {
         Order order = orderFactory.createOrder(building, room);
         orderRepository.save(order);
@@ -54,53 +64,60 @@ public class PancakeService {
     // This method is deprecated and will be removed in future versions.
     // Use addPancake instead.
     public void addDarkChocolatePancake(UUID orderId, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancakeFactory.createRecipe(List.of(Ingredient.DARK_CHOCOLATE)), order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancakeFactory.createRecipe(List.of(Ingredient.DARK_CHOCOLATE)), order);
+            }
+        });
     }
 
     @Deprecated
     // This method is deprecated and will be removed in future versions.
     // Use addPancake instead.
     public void addDarkChocolateWhippedCreamPancake(UUID orderId, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancakeFactory.createRecipe(List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM)), order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancakeFactory.createRecipe(List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM)), order);
+            }
+        });
     }
 
     @Deprecated
     // This method is deprecated and will be removed in future versions.
     // Use addPancake instead.
     public void addDarkChocolateWhippedCreamHazelnutsPancake(UUID orderId, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancakeFactory.createRecipe(
-                            List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM, Ingredient.HAZELNUTS)),
-                    order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancakeFactory.createRecipe(List.of(Ingredient.DARK_CHOCOLATE, Ingredient.WHIPPED_CREAM, Ingredient.HAZELNUTS)), order);
+            }
+        });
     }
 
     @Deprecated
     // This method is deprecated and will be removed in future versions.
     // Use addPancake instead.
     public void addMilkChocolatePancake(UUID orderId, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancakeFactory.createRecipe(List.of(Ingredient.MILK_CHOCOLATE)), order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancakeFactory.createRecipe(List.of(Ingredient.MILK_CHOCOLATE)), order);
+            }
+        });
     }
 
     @Deprecated
     // This method is deprecated and will be removed in future versions.
     // Use addPancake instead.
     public void addMilkChocolateHazelnutsPancake(UUID orderId, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancakeFactory.createRecipe(List.of(Ingredient.MILK_CHOCOLATE, Ingredient.HAZELNUTS)),
-                    order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancakeFactory.createRecipe(List.of(Ingredient.MILK_CHOCOLATE, Ingredient.HAZELNUTS)), order);
+            }
+        });
     }
 
     /**
@@ -111,11 +128,12 @@ public class PancakeService {
      * @param count   the number of pancakes to add
      */
     public void addPancake(UUID orderId, PancakeRecipe pancake, int count) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        addPancake(pancake, order);
-        for (int i = 0; i < count; ++i) {
-            addPancake(pancake, order);
-        }
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            for (int i = 0; i < count; ++i) {
+                addPancake(pancake, order);
+            }
+        });
     }
 
     public List<String> viewOrder(UUID orderId) {
@@ -128,24 +146,26 @@ public class PancakeService {
     }
 
     public void removePancakes(String description, UUID orderId, int count) {
-        int removedCount = pancakeRepository.removePancakes(orderId, description, count);
-
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        orderLogger.logRemovePancakes(order, description, pancakeRepository.getPancakesCount(order.getId()), removedCount);
+        withOrderLock(orderId, () -> {
+            int removedCount = pancakeRepository.removePancakes(orderId, description, count);
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            orderLogger.logRemovePancakes(order, description, pancakeRepository.getPancakesCount(order.getId()), removedCount);
+        });
     }
 
     public void cancelOrder(UUID orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        orderLogger.logCancelOrder(order, pancakeRepository.getPancakesCount(order.getId()));
-        pancakeRepository.remove(orderId);
-        orderRepository.deleteById(orderId);
-        orderStateService.remove(orderId);
-
-        orderLogger.logCancelOrder(order, pancakeRepository.getPancakesCount(order.getId()));
+        withOrderLock(orderId, () -> {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            orderLogger.logCancelOrder(order, pancakeRepository.getPancakesCount(order.getId()));
+            pancakeRepository.remove(orderId);
+            orderRepository.deleteById(orderId);
+            orderStateService.remove(orderId);
+        });
+        removeOrderLock(orderId);
     }
 
     public void completeOrder(UUID orderId) {
-        orderStateService.update(orderId, OrderState.COMPLETED);
+        withOrderLock(orderId, () -> orderStateService.update(orderId, OrderState.COMPLETED));
     }
 
     public Set<UUID> listCompletedOrders() {
@@ -154,7 +174,7 @@ public class PancakeService {
     }
 
     public void prepareOrder(UUID orderId) {
-        orderStateService.update(orderId, OrderState.PREPARED);
+        withOrderLock(orderId, () -> orderStateService.update(orderId, OrderState.PREPARED));
     }
 
     public Set<UUID> listPreparedOrders() {
@@ -162,15 +182,37 @@ public class PancakeService {
     }
 
     public Object[] deliverOrder(UUID orderId) {
-        if (orderStateService.get(orderId) != OrderState.PREPARED) return null;
+        final Lock lock = getOrderLock(orderId);
+        lock.lock();
 
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        List<String> pancakesToDeliver = viewOrder(orderId);
-        orderLogger.logDeliverOrder(order, pancakeRepository.getPancakesCount(order.getId()));
-        pancakeRepository.remove(orderId);
-        orderRepository.deleteById(orderId);
-        orderStateService.remove(orderId);
+        try {
+            if (orderStateService.get(orderId) != OrderState.PREPARED) return null;
 
-        return new Object[]{order, pancakesToDeliver};
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+            List<String> pancakesToDeliver = viewOrder(orderId);
+            orderLogger.logDeliverOrder(order, pancakeRepository.getPancakesCount(order.getId()));
+            pancakeRepository.remove(orderId);
+            orderRepository.deleteById(orderId);
+            orderStateService.remove(orderId);
+
+            return new Object[]{order, pancakesToDeliver};
+        } finally {
+            lock.unlock();
+            removeOrderLock(orderId);
+        }
+    }
+
+    private void withOrderLock(UUID orderId, Runnable action) {
+        final Lock lock = getOrderLock(orderId);
+        lock.lock();
+        try {
+            action.run();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void removeOrderLock(UUID orderId) {
+        orderLocks.remove(orderId);
     }
 }
