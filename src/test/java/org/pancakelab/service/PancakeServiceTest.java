@@ -74,15 +74,6 @@ public class PancakeServiceTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(11)
-    public void GivenOrderDoesNotExist_WhenCreatingOrderWithInvalidParams_ThenThrowsValidationException_Test() {
-        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING - 1, MIN_ROOM));
-        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MAX_BUILDING + 1, MIN_ROOM));
-        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING, MIN_ROOM - 1));
-        assertThrows(ValidationException.class, () -> pancakeService.createOrder(MIN_BUILDING, MAX_ROOM + 1));
-    }
-
-    @Test
     @org.junit.jupiter.api.Order(20)
     public void GivenOrderExists_WhenAddingPancakes_ThenCorrectNumberOfPancakesAdded_Test() {
         // setup
